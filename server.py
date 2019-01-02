@@ -3,6 +3,8 @@ from flask_cors import CORS
 import sqlite3 as sql
 import json
 from werkzeug import secure_filename
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 app = Flask(__name__)
 CORS(app)
@@ -291,6 +293,11 @@ def uploader_file():
 		f.save(secure_filename(f.filename))
 		return "file uploaded successfully"
 
+@app.route('/api/test', method = ['GET', 'POST'])
+def hahaha():
+	r = requests.post('http://192.168.4.57:4000/transcribe', data=mData, headers={'Content-Type': m.content_type})
+	r.headers['content-type']
+	
 
 if __name__ == '__main__':
 	app.run( host='0.0.0.0', port=5000, debug=True)
