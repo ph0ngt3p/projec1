@@ -3,6 +3,8 @@ from flask_cors import CORS
 import sqlite3 as sql
 import json
 from werkzeug import secure_filename
+from deep_speaker import unseen_speakers, audio_reader
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -288,8 +290,24 @@ def delete_detail(id,id2):
 def uploader_file():
 	if request.method == 'POST':
 		f = request.files['file']
-		f.save(secure_filename(f.filename))
-		return "file uploaded successfully"
+		f.save(os.path.join('lkh', secure_filename(f.filename)))
+		audio_path =os.getcwd() +"/"+ os.path.join('lkh', secure_filename(f.filename))
+		r = os.popen('curl -X POST http://0.0.0.0:4000/transcribe -H "Content-type: multipart/form-data"' + ' -F "file=@"' + audio_path).read()
+		return r
+
+#api upload file
+@app.route('/api/inference', methods = ['POST'])
+def inference():
+	if request.method == 'POST':
+		person1=request.json['person1']
+		person2=request.json['person2']
+		ar = audio_reader.AudioReader()
+		result = unseen_speakers.inference_unseen_speakers(ar, person1, person2)
+		return json.dumps({
+			'status': 'ok',
+			'result': 'Same' if result else 'Not same'	
+		})
+
 
 
 if __name__ == '__main__':
